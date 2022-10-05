@@ -12,7 +12,7 @@ const base:ApiBase = {
 }
 
 interface ApiObject {
-  login:(data:Record<string,unknown>)=>AxiosPromise<any>,
+  login:(data:Record<string,unknown>)=>AxiosPromise,
 }
 
 const api: ApiObject = {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    Usermanage
+    device
   </div>
 </template>
 

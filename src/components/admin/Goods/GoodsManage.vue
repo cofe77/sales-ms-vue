@@ -1,6 +1,6 @@
 <template>
   <div>
-    default
+    goodslist
   </div>
 </template>
 

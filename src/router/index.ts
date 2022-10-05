@@ -1,19 +1,121 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeDefault from '@/components/HomeDefault.vue'
-import UserManage from '@/components/UserManage/UserManage.vue'
+import HomeLayoutView from '@/views/HomeLayoutView.vue'
+import PCLayoutView from '@/views/PcLayoutView.vue'
+import AdminLayoutViewVue from '@/views/AdminLayoutView.vue'
+import KitchenLayoutView from '@/views/KitchenLayoutView.vue'
+import PcOperationVue from '@/components/PC/PcOperation.vue'
+import PcOrderVue from '@/components/PC/PcOrder.vue'
+import PcVIPVue from '@/components/PC/PcVIP.vue'
+import PcInventoryVue from '@/components/PC/PcInventory.vue'
+import PcSearchVue from '@/components/PC/PcSearch.vue'
+import AdminHomeVue from '@/components/admin/AdminHome.vue'
+import GoodsManageVue from '@/components/admin/Goods/GoodsManage.vue'
+import AddGoodsVue from '@/components/admin/Goods/AddGoods.vue'
+import GoodsTypeVue from '@/components/admin/Goods/GoodsType.vue'
+import DeskManageVue from '@/components/admin/DeskManage.vue'
+import UserManageVue from '@/components/admin/UserManage.vue'
+import DeviceManageVue from '@/components/admin/DeviceManage.vue'
+import CarouselManageVue from '@/components/admin/CarouselManage.vue'
+import SavedBeerManageVue from '@/components/admin/SavedBeerManage.vue'
+import AnalyseViewVue from '@/components/admin/AnalyseView.vue'
+import VIPManageVue from '@/components/admin/VIPManage.vue'
+import OrderManageVue from '@/components/admin/OrderManage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeDefault,
+      component: HomeLayoutView,
     },
     {
-      path: '/user',
-      name: 'user',
-      component: UserManage,
+      path: '/pc',
+      component: PCLayoutView,
+      children: [
+        {
+          path: '',//首页
+          component: PcOperationVue
+        },
+        {
+          path: 'order',//点餐
+          component: PcOrderVue
+        },
+        {
+          path: 'vip',//vip
+          component: PcVIPVue
+        },
+        {
+          path: 'inventory',//库存
+          component: PcInventoryVue
+        },
+        {
+          path: 'search',//搜索
+          component: PcSearchVue
+        },
+      ]
+    },
+    {
+      path: '/admin',//后台
+      component: AdminLayoutViewVue,
+      children: [
+        {
+          path: '',//首页
+          component: AdminHomeVue
+        },
+        {
+          path: 'goods',//点餐
+          children: [
+            {
+              path: 'list',
+              component: GoodsManageVue
+            },
+            {
+              path: 'add',
+              component: AddGoodsVue
+            },
+            {
+              path: 'type',
+              component: GoodsTypeVue
+            },
+          ]
+        },
+        {
+          path: 'desk',//点餐
+          component: DeskManageVue
+        },
+        {
+          path: 'user',//点餐
+          component: UserManageVue
+        },
+        {
+          path: 'vip',//vip
+          component: VIPManageVue
+        },
+        {
+          path: 'device',//vip
+          component: DeviceManageVue
+        },
+        {
+          path: 'carousel',//库存
+          component: CarouselManageVue
+        },
+        {
+          path: 'savedBeer',//搜索
+          component: SavedBeerManageVue
+        },
+        {
+          path: 'order',//点餐
+          component: OrderManageVue
+        },
+        {
+          path: 'analyse',//点餐
+          component: AnalyseViewVue
+        },
+      ]
+    },
+    {
+      path: '/kitchen',//厨房大屏
+      component: KitchenLayoutView,
     },
   ],
 })

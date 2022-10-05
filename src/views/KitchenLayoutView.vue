@@ -38,7 +38,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .logo{
   height: 60px;
   background-color: rgb(37, 36, 36);

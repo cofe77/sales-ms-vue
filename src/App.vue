@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import LayoutView from './views/LayoutView.vue'
+import HomeLayoutView from './views/HomeLayoutView.vue'
 </script>
 
 <template>
-  <LayoutView />
+  <HomeLayoutView />
 </template>
 
-<style scoped>
+<style scoped lang="less">
 </style>

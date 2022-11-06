@@ -13,10 +13,13 @@
     </div>
     <div class="pc-waitForSend">
       <div class="waitForSend-header">待配送</div>
-      <div v-for="i in 8" :key="i" class="waitForSend-item">
-        <div class="waitForSend-name">啤酒（罐）×1</div>
-        <div class="waitForSend-confirm">
-          <div class="waitForSend-confirm-btn">确认</div>
+      <div class="waitForSend-body">
+        <div v-for="item in dispatchList" :key="item.id" class="waitForSend-item">
+          <div class="waitForSend-name">{{item.goods?.name || ''}}</div>
+          <div class="waitForSend-count">×{{item.count}}</div>
+          <div class="waitForSend-confirm">
+            <div class="waitForSend-confirm-btn" @click="handleDispatch(item.id)">确认</div>
+          </div>
         </div>
       </div>
     </div>
@@ -24,14 +27,48 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted, ref, watch, type Ref } from 'vue'
+import { RouterView, useRoute, useRouter } from 'vue-router'
+import { io } from 'socket.io-client'
+import type { OrderGoodsType } from '@/types/goods'
+import { ElMessage } from 'element-plus'
+
 const router = useRouter()
 const route = useRoute()
 const current = ref('pc')
+const dispatchList: Ref<OrderGoodsType[]> = ref([])
+
 watch(route,()=>current.value = location.href.split('/').reverse()[0])
 const pcLinkTo = (target:string) => {
   router.push(target)
+}
+
+const socket = io('http://192.168.1.2:3001',{
+  transports: ['websocket']
+})
+
+socket.emit('findAllDispatch',null,(data: any) => {
+  dispatchList.value = data
+})
+
+onMounted(() => {
+  socket.on('newOrder',()=>{
+    socket.emit('findAllDispatch',null,(data: any) => {
+      dispatchList.value = data.result
+    })
+  })
+})
+
+
+const handleDispatch = (id: string) => {
+  socket.emit('finishDispatchById',id,(data:any)=>{
+    if(data.affected === 1){
+      dispatchList.value = dispatchList.value.filter((dis:OrderGoodsType)=>dis.id!==id)
+      ElMessage.success('配送成功')
+    }else{
+      ElMessage.error('配送失败')
+    }
+  })
 }
 </script>
 
@@ -87,32 +124,39 @@ const pcLinkTo = (target:string) => {
       text-align: center;
       background-color: rgb(216, 216, 216);
     }
-    .waitForSend-item{
-      display: flex;
-      cursor: pointer;
-      border-top: 1px solid #d8d8d8;
-      padding-left: 10px;
-      align-items: center;
-      &:last-child{
-        border-bottom: 1px solid #d8d8d8;
-      }
-      .waitForSend-name{
-        width: 140px;
-        line-height: 40px;
-      }
-      .waitForSend-confirm{
-        display: none;
-        margin-left: 10px;
-        .waitForSend-confirm-btn{
-          background-color: rgb(99, 63, 207);
-          padding: 5px 10px;
-          border-radius: 3px;
-          color: #d8d8d8;
+    .waitForSend-body{
+      height: 632px;
+      overflow-y: scroll;
+      .waitForSend-item{
+        display: flex;
+        cursor: pointer;
+        border-top: 1px solid #d8d8d8;
+        padding-left: 10px;
+        align-items: center;
+        &:last-child{
+          border-bottom: 1px solid #d8d8d8;
         }
-      }
-      &:hover{
+        .waitForSend-name{
+          width: 130px;
+          line-height: 40px;
+        }
+        .waitForSend-count{
+          line-height: 40px;
+        }
         .waitForSend-confirm{
-          display: block;
+          display: none;
+          margin-left: 10px;
+          .waitForSend-confirm-btn{
+            background-color: rgb(99, 63, 207);
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: #d8d8d8;
+          }
+        }
+        &:hover{
+          .waitForSend-confirm{
+            display: block;
+          }
         }
       }
     }

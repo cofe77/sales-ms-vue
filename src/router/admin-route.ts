@@ -18,12 +18,7 @@ export const AdminRoute = [
         path: '/admin/goods/add',
         icon: '',
         name: '新增商品'
-      },
-      {
-        path: '/admin/goods/type',
-        icon: '',
-        name: '商品类别'
-      },
+      }
     ]
   },
   {
@@ -40,11 +35,6 @@ export const AdminRoute = [
     path: '/admin/vip',
     icon: 'Avatar',
     name: 'VIP'
-  },
-  {
-    path: '/admin/device',
-    icon: 'Platform',
-    name: '设备'
   },
   {
     path: '/admin/carousel',

@@ -109,7 +109,7 @@
 .statistics{
   margin-top: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   .statistics-item{
     width: 395px;
     position: relative;
@@ -145,7 +145,7 @@
 .rank{
   margin-top: 10px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   .rank-item{
     width: 600px;
     .rank-title{

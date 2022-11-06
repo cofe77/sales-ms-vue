@@ -11,10 +11,8 @@ import PcSearchVue from '@/components/PC/PcSearch.vue'
 import AdminHomeVue from '@/components/admin/AdminHome.vue'
 import GoodsManageVue from '@/components/admin/Goods/GoodsManage.vue'
 import AddGoodsVue from '@/components/admin/Goods/AddGoods.vue'
-import GoodsTypeVue from '@/components/admin/Goods/GoodsType.vue'
 import DeskManageVue from '@/components/admin/DeskManage.vue'
 import UserManageVue from '@/components/admin/UserManage.vue'
-import DeviceManageVue from '@/components/admin/DeviceManage.vue'
 import CarouselManageVue from '@/components/admin/CarouselManage.vue'
 import SavedBeerManageVue from '@/components/admin/SavedBeerManage.vue'
 import AnalyseViewVue from '@/components/admin/AnalyseView.vue'
@@ -72,11 +70,7 @@ const router = createRouter({
             {
               path: 'add',
               component: AddGoodsVue
-            },
-            {
-              path: 'type',
-              component: GoodsTypeVue
-            },
+            }
           ]
         },
         {
@@ -90,10 +84,6 @@ const router = createRouter({
         {
           path: 'vip',//vip
           component: VIPManageVue
-        },
-        {
-          path: 'device',//vip
-          component: DeviceManageVue
         },
         {
           path: 'carousel',//库存

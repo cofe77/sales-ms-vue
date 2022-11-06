@@ -1,15 +1,23 @@
 <template>
   <div class="pc-operation">
-    <div v-for="i in 18" :key="i" class="pc-desk">
-      <div class="desk-name">听风阁</div>
-      <div class="desk-type">大包</div>
-      <div class="desk-startTime">开始时间：16:00:00</div>
+    <div v-for="desk in deskList" :key="desk.id" :class="['pc-desk', {'pc-desk-on':!!desk.order}]">
+      <div class="desk-name">{{desk.name}}</div>
+      <div class="desk-type">{{desk.type?.name || '大厅'}}</div>
+      <div v-show="desk.order?.finishTime" class="desk-startTime">开始时间：{{ moment(desk.order?.createTime).format('YYYY-MM-DD HH:mm:ss')}}</div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import api from '@/api'
+import type DeskType from '@/types/desk'
+import moment from 'moment'
+import { ref, type Ref } from 'vue'
 
+const deskList: Ref<DeskType[]> = ref([])
+api.getDeskListWithOrder().then(res=>{
+  deskList.value = res.data.data
+})
 </script>
 
 <style lang="less">
@@ -23,7 +31,7 @@
       border: 1px solid #d8d8d8;
       margin: 2px;
       text-align: center;
-      background-color: rgb(216, 216, 216);
+      background-color: rgb(150, 241, 135);
       .desk-name{
         font-size: 24px;
         margin-top: 20px;
@@ -36,6 +44,9 @@
         font-size: 16px;
         margin-top: 20px;
       }
+    }
+    .pc-desk-on{
+      background-color: #e9abab;
     }
   }
 </style>

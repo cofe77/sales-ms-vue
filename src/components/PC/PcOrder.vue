@@ -2,7 +2,7 @@
   <div class="pc-order">
     <div class="goods-type-container">
       <div class="goods-type-header">分类</div>
-      <div v-for="i in 10" :key="i" class="goods-type-item" :class="{'goods-type-item-on': i === 1}">酒水</div>
+      <div v-for="goodsType in goodsTypeArr" :key="goodsType.id" :class="['goods-type-item',{'goods-type-item-on':goodsType.id === ''}]">酒水</div>
     </div>
     <div class="goods-container">
       <div v-for="i in 20" :key="i" class="goods">
@@ -41,7 +41,15 @@
 </template>
 
 <script lang="ts" setup>
+import api from '@/api'
+import type { GoodsTypeType } from '@/types/goods'
+import { ref, type Ref } from 'vue'
 
+const goodsTypeArr: Ref<GoodsTypeType[]> = ref([])
+
+api.getGoodsTypeWithGoods().then(res=>{
+  goodsTypeArr.value = res.data
+})
 </script>
 
 <style lang="less">
@@ -84,13 +92,23 @@
       background-color: rgb(216, 163, 251);
       padding: 2px;
       .goods-img{
-        width: 127px;
+        width: 145px;
         height: 86px;
         img{
           width: 100%;
           height: 100%;
           border: 1px solid #d8d8d8;
         }
+      }
+      .goods-name{
+        font-size: 18px;
+        line-height: 30px;
+      }
+      .goods-desc{
+        line-height: 20px;
+      }
+      .goods-price{
+        color: red;
       }
     }
   }

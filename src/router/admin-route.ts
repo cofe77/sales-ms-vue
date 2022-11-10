@@ -7,19 +7,7 @@ export const AdminRoute = [
   {
     path: '/admin/goods',
     icon: 'Goods',
-    name: '商品',
-    children: [
-      {
-        path: '/admin/goods/list',
-        icon: '',
-        name: '所有商品'
-      },
-      {
-        path: '/admin/goods/add',
-        icon: '',
-        name: '新增商品'
-      }
-    ]
+    name: '商品'
   },
   {
     path: '/admin/desk',

@@ -3,16 +3,16 @@
     :model-value="show"
     @open="open"
     @opened="opened"
-    @close="close"
     @closed="closed"
     center
     :title="title"
+    :top="top"
   >
     <slot></slot>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="close">{{cancelText}}</el-button>
-        <el-button type="primary" @click="close">{{okText}}</el-button
+        <el-button v-if="!disableCancel" @click="close">{{cancelText}}</el-button>
+        <el-button v-if="!disableOk" type="primary" @click="ok">{{okText}}</el-button
         >
       </span>
     </template>
@@ -21,7 +21,7 @@
 
 <script lang="ts" setup>
 import { toRefs } from 'vue'
-const emit = defineEmits(['open','opened','close','closed'])
+const emit = defineEmits(['open','opened','close','closed','ok'])
 
 const props = defineProps({
   show: {
@@ -40,10 +40,22 @@ const props = defineProps({
   cancelText: {
     type: String,
     default: '取消'
-  }
+  },
+  top: {
+    type: String,
+    default: '',
+  },
+  disableOk: {
+    type: Boolean,
+    default: false,
+  },
+  disableCancel: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const { show, title } = toRefs(props)
+const { show, title, top, disableOk, disableCancel } = toRefs(props)
 
 const open = () => {
   emit('open')
@@ -53,6 +65,9 @@ const opened = () => {
 }
 const close = () => {
   emit('close')
+}
+const ok = () => {
+  emit('ok')
 }
 const closed = () => {
   emit('closed')

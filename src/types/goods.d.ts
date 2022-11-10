@@ -1,15 +1,17 @@
 import type OrderType from './order'
+import type DeskType from './desk'
 
 export default interface GoodsType {
-  id: string,
+  id?: string,
   name: string,
   price: number,
   desc: string,
   discount: number,
   count: number,
-  type: string,
+  typeId: string,
   img: string,
-  updateTime: string
+  state: number,
+  updateTime?: string
 }
 
 export interface GoodsTypeType {
@@ -23,5 +25,6 @@ export interface OrderGoodsType {
   orderId: string,
   goodsId: string,
   goods: GoodsType,
+  desk: DeskType,
   order: OrderType
 }

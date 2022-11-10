@@ -15,7 +15,7 @@
       <div class="waitForSend-header">待配送</div>
       <div class="waitForSend-body">
         <div v-for="item in dispatchList" :key="item.id" class="waitForSend-item">
-          <div class="waitForSend-name">{{item.goods?.name || ''}}</div>
+          <div class="waitForSend-name">{{item.goods?.name || ''}}({{item.desk?.name}})</div>
           <div class="waitForSend-count">×{{item.count}}</div>
           <div class="waitForSend-confirm">
             <div class="waitForSend-confirm-btn" @click="handleDispatch(item.id)">确认</div>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch, type Ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { io } from 'socket.io-client'
 import type { OrderGoodsType } from '@/types/goods'
@@ -52,11 +52,17 @@ socket.emit('findAllDispatch',null,(data: any) => {
 })
 
 onMounted(() => {
-  socket.on('newOrder',()=>{
+  socket.on('newOrder',(result)=>{
+    console.log('newOrder',result)
     socket.emit('findAllDispatch',null,(data: any) => {
-      dispatchList.value = data.result
+      console.log('data',data)
+      dispatchList.value = data
     })
   })
+})
+
+onUnmounted(() => {
+  socket.close()
 })
 
 
@@ -132,15 +138,18 @@ const handleDispatch = (id: string) => {
         cursor: pointer;
         border-top: 1px solid #d8d8d8;
         padding-left: 10px;
+        font-size: 13px;
         align-items: center;
         &:last-child{
           border-bottom: 1px solid #d8d8d8;
         }
         .waitForSend-name{
           width: 130px;
+          font-size: 12px;
           line-height: 40px;
         }
         .waitForSend-count{
+          width: 30px;
           line-height: 40px;
         }
         .waitForSend-confirm{

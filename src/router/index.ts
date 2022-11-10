@@ -1,3 +1,4 @@
+import { useUserStore } from './../stores/user'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeLayoutView from '@/views/HomeLayoutView.vue'
 import PCLayoutView from '@/views/PcLayoutView.vue'
@@ -9,8 +10,8 @@ import PcVIPVue from '@/components/PC/PcVIP.vue'
 import PcInventoryVue from '@/components/PC/PcInventory.vue'
 import PcSearchVue from '@/components/PC/PcSearch.vue'
 import AdminHomeVue from '@/components/admin/AdminHome.vue'
+import AdminLoginVue from '@/components/admin/AdminLogin.vue'
 import GoodsManageVue from '@/components/admin/Goods/GoodsManage.vue'
-import AddGoodsVue from '@/components/admin/Goods/AddGoods.vue'
 import DeskManageVue from '@/components/admin/DeskManage.vue'
 import UserManageVue from '@/components/admin/UserManage.vue'
 import CarouselManageVue from '@/components/admin/CarouselManage.vue'
@@ -55,6 +56,12 @@ const router = createRouter({
     {
       path: '/admin',//后台
       component: AdminLayoutViewVue,
+      beforeEnter: (to)=>{
+        // const store = useUserStore()
+        // if(!store.id && to.path != '/adminLogin'){
+        //   return { path: '/adminLogin', replace: true }
+        // }
+      },
       children: [
         {
           path: '',//首页
@@ -62,16 +69,7 @@ const router = createRouter({
         },
         {
           path: 'goods',//点餐
-          children: [
-            {
-              path: 'list',
-              component: GoodsManageVue
-            },
-            {
-              path: 'add',
-              component: AddGoodsVue
-            }
-          ]
+          component: GoodsManageVue
         },
         {
           path: 'desk',//点餐
@@ -102,6 +100,10 @@ const router = createRouter({
           component: AnalyseViewVue
         },
       ]
+    },
+    {
+      path: '/adminLogin',//首页
+      component: AdminLoginVue
     },
     {
       path: '/kitchen',//厨房大屏

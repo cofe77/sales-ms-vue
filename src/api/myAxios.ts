@@ -50,7 +50,6 @@ axios.interceptors.response.use(
         })
       return Promise.reject(res)
     }
-    ElMessage.success(res.data.msg)
     return Promise.resolve(res)
   },
   async (err: any) => {

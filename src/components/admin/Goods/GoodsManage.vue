@@ -5,12 +5,12 @@
         <el-form-item class="input">
           <el-input placeholder="请输入商品名或商品描述进行搜索">
             <template #append>
-              <el-button type="primary" class="search"><el-icon><Search /></el-icon></el-button>
+              <el-button class="btn-primary btn-append"><el-icon><Search /></el-icon></el-button>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleGoodsAdd">
             <el-icon><Plus /></el-icon>
             &emsp;新增商品
           </el-button>
@@ -35,7 +35,13 @@
         </el-table-column>
         <el-table-column label="图片" width="100">
           <template #default="scope">
-            <img :src="scope.row.img" width="80" alt="" srcset="">
+            <el-image :src="scope.row.img" width="80" alt="" srcset="">
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><icon-picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
           </template>
         </el-table-column>
         <el-table-column label="修改时间" width="180">
@@ -48,10 +54,10 @@
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <el-button v-if="scope.row.state===1" type="warning" size="small" @click="handlePull(scope.row.id, 0)">下架</el-button>
-              <el-button v-else type="danger" size="small" @click="handlePull(scope.row.id, 1)">上架</el-button>
-              <el-button type="primary" size="small" @click="handleEdit(scope.row)">修改</el-button>
-              <el-button type="danger" size="small" @click="handleRemove(scope.row.id)">删除</el-button>
+              <el-button v-if="scope.row.state===1" type="warning" size="small" @click="handleGoodsPull(scope.row.id, 0)">下架</el-button>
+              <el-button v-else type="danger" size="small" @click="handleGoodsPull(scope.row.id, 1)">上架</el-button>
+              <el-button type="primary" size="small" @click="handleGoodsEdit(scope.row)">修改</el-button>
+              <el-button type="danger" size="small" @click="handleGoodsRemove(scope.row.id)">删除</el-button>
             </div>
           </template>
         </el-table-column>
@@ -69,9 +75,9 @@
         @current-change="handleCurrentChange"
     />
     </div>
-    <DialogModel :show="goodsFormVisible" :title="goodsFormTitle" width="1100px" top="60px" :disableOk="true" @close="close">
+    <DialogModel :show="goodsFormVisible" :title="goodsFormTitle" width="1100px" top="60px" :disableOk="true" @closed="closed" :hasFooter="false">
       <Suspense>
-        <GoodsForm @close="close" :goodsId="goodsId" :state="state" :show="goodsFormVisible" />
+        <GoodsForm @close="closed" :goodsId="goodsId" :state="state" :show="goodsFormVisible" />
         <template #fallback>
           <div>
             正在获取数据
@@ -85,6 +91,7 @@
 <script lang="ts" setup>
 import api from '@/api'
 import type GoodsType from '@/types/goods'
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import moment from 'moment'
 import { nextTick, proxyRefs, ref, type Ref } from 'vue'
@@ -94,7 +101,7 @@ import GoodsForm from './GoodsForm.vue'
 const router = useRouter()
 const goodsId = ref('')
 
-const close = () => {
+const closed = () => {
   api.getGoodsWithType().then(res=>{
     goodsData.value = res.data.data
   })
@@ -112,21 +119,22 @@ api.getGoodsWithType().then(res=>{
 
 const currentPage1 = ref(5)
 
-const handleAdd = () => {
+const handleGoodsAdd = () => {
+  console.log('goodsFormVisible.value',goodsFormVisible.value)
   state.value = 'add'
   goodsId.value = ''
   goodsFormTitle.value = '新增商品'
   goodsFormVisible.value = true
 }
 
-const handlePull = async (id: string, state: number) => {
+const handleGoodsPull = async (id: string, state: number) => {
   const { data } = await api.pullGoods(id, state)
   if(data.status === 11111){
     goodsData.value.find(goods=>goods.id === id)!.state = state
     ElMessage.success(`${state===1?'上架':'下架'}成功`)
   }
 }
-const handleEdit = (rowData: GoodsType) => {
+const handleGoodsEdit = (rowData: GoodsType) => {
   goodsFormTitle.value = '修改商品信息'
   state.value = 'edit'
   if(rowData.id){
@@ -134,8 +142,14 @@ const handleEdit = (rowData: GoodsType) => {
   }
   goodsFormVisible.value = true
 }
-const handleRemove = (id: string) => {
-  console.log('id',id)
+const handleGoodsRemove = async (id: string) => {
+  const { data } = await api.removeGoods(id)
+  if(data.status === 11111){
+    goodsData.value = goodsData.value.filter(goods=>goods.id !== id)
+    ElMessage.success('删除成功')
+  }else{
+    ElMessage.error(data.data.error)
+  }
 }
 const handleSizeChange = (index: number, rowData: GoodsType) => {
   console.log('rowData',rowData)
@@ -152,15 +166,6 @@ const handleCurrentChange = (index: number, rowData: GoodsType) => {
   .input{
     width: 400px;
   }
-  .search{
-    background-color: #409eff;
-    color: #fff;
-    border-radius: 0 4px 4px 0;
-    &:hover{
-      background-color: #79bbff;
-      color: #fff;
-    }
-  }
 }
 .body{
   .goods-desc{
@@ -173,5 +178,12 @@ const handleCurrentChange = (index: number, rowData: GoodsType) => {
   display: flex;
   justify-content: space-around;
   margin-top: 20px;
+}
+.el-image {
+  padding: 0 5px;
+  max-width: 300px;
+  max-height: 80px;
+  width: 100%;
+  height: 200px;
 }
 </style>

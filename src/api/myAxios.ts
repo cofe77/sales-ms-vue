@@ -53,7 +53,11 @@ axios.interceptors.response.use(
     return Promise.resolve(res)
   },
   async (err: any) => {
-    ElMessage.error(err)
+    const aa = err.response.data.msg !== 'Bad Request Exception'
+    console.log('aa',aa)
+    if(err.response.data.msg !== 'Bad Request Exception'){
+      ElMessage.error(err.response.data.msg)
+    }
     return Promise.reject(err.response)
   }
 )

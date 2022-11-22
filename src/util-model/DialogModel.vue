@@ -9,7 +9,7 @@
     :top="top"
   >
     <slot></slot>
-    <template #footer>
+    <template #footer v-if="hasFooter">
       <span class="dialog-footer">
         <el-button v-if="!disableCancel" @click="close">{{cancelText}}</el-button>
         <el-button v-if="!disableOk" type="primary" @click="ok">{{okText}}</el-button
@@ -53,9 +53,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hasFooter: {
+    type: Boolean,
+    default: true,
+  },
 })
 
-const { show, title, top, disableOk, disableCancel } = toRefs(props)
+const { show, title, top, disableOk, disableCancel, hasFooter } = toRefs(props)
 
 const open = () => {
   emit('open')

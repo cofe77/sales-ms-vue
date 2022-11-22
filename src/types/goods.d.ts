@@ -15,12 +15,12 @@ export default interface GoodsType {
 }
 
 export interface GoodsTypeType {
-  id: string,
+  id?: string,
   name: string,
 }
 
 export interface OrderGoodsType {
-  id: string,
+  id?: string,
   count: number,
   orderId: string,
   goodsId: string,

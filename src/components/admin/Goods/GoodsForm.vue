@@ -4,10 +4,10 @@
       <div class="form-header">请填写商品信息</div>
       <div class="form-body">
         <el-form
-          ref="ruleFormRef"
+          ref="goodsFormRef"
           :model="goodsForm"
-          :rules="rules"
-          label-width="120px"
+          :rules="goodsRules"
+          label-width="80px"
           class="demo-ruleForm"
           size="default"
           status-icon
@@ -17,7 +17,7 @@
               <el-select v-model.string="goodsForm.typeId" placeholder="类别">
                 <el-option v-for="goodsType in goodsTypeList" :key="goodsType.id" :label="goodsType.name" :value="goodsType.id" />
               </el-select>
-              <el-button type="primary">类别管理</el-button>
+              <el-button type="primary" @click="goodsTypeDialogShow = true">类别管理</el-button>
             </el-space>
           </el-form-item>
           <el-form-item label="商品名称" prop="name">
@@ -69,10 +69,10 @@
             <el-input v-model="goodsForm.desc" type="textarea" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="resetForm(ruleFormRef)"
+            <el-button type="primary" @click="resetForm(goodsFormRef)"
               >重置</el-button
             >
-            <el-button @click="submitForm(ruleFormRef)">确认</el-button>
+            <el-button @click="submitForm(goodsFormRef)">确认</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -82,7 +82,13 @@
         <div class="preview-header">前台预览</div>
         <div class="preview-body">
           <div class="pc-preview">
-            <img :src="goodsForm.img" alt="">
+            <el-image :src="goodsForm.img">
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><icon-picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
             <div class="pc-preview-name">{{goodsForm.name}}</div>
             <div class="pc-preview-desc">{{goodsForm.desc}}</div>
             <div class="pc-preview-price">{{goodsForm.price}}元</div>
@@ -93,7 +99,13 @@
         <div class="preview-header">POS预览</div>
         <div class="preview-body">
           <div class="pos-preview">
-            <img :src="goodsForm.img" alt="">
+            <el-image :src="goodsForm.img">
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><icon-picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
             <div class="pos-preview-name">{{goodsForm.name}}</div>
             <div class="pos-preview-desc">{{goodsForm.desc}}</div>
             <div class="pos-preview-price">{{goodsForm.price}}元</div>
@@ -104,7 +116,13 @@
         <div class="preview-header">PAD预览</div>
         <div class="preview-body">
           <div class="pad-preview">
-            <img :src="goodsForm.img" alt="">
+            <el-image :src="goodsForm.img">
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><icon-picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
             <div class="pad-preview-name">{{goodsForm.name}}</div>
             <div class="pad-preview-desc">{{goodsForm.desc}}</div>
             <div class="pad-preview-price">{{goodsForm.price}}元</div>
@@ -115,7 +133,13 @@
         <div class="preview-header">后厨预览</div>
         <div class="preview-body">
           <div class="kitchen-preview">
-            <img :src="goodsForm.img" alt="">
+            <el-image :src="goodsForm.img">
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><IconPicture /></el-icon>
+                </div>
+              </template>
+            </el-image>
             <div class="kitchen-preview-name">{{goodsForm.name}}</div>
             <div class="kitchen-preview-desc">{{goodsForm.desc}}</div>
             <div class="kitchen-preview-price">{{goodsForm.price}}元</div>
@@ -123,7 +147,7 @@
         </div>
       </div>
     </div>
-    <DialogModel :show="cropperShow" title="" width="400px" @ok="handleCropperOk" >
+    <DialogModel :show="cropperShow" title="" width="400px" @ok="handleCropperOk" @closed="cropperShow = false">
       <div class="img-cropper">
         <vueCropper
           ref="cropper"
@@ -137,16 +161,55 @@
         ></vueCropper>
       </div>
     </DialogModel>
+    <DialogModel :show="goodsTypeDialogShow" title="商品类别管理" width="350px" @closed="goodsTypeDialogShow = false" :has-footer="false">
+      <div class="goodsType-manage">
+        <div class="goodsType-header">
+          <el-form ref="goodsTypeFormRef" :model="goodsTypeForm" :rules="goodsTypeRules" :inline="true" size="default" :style="{textAlign:'center'}">
+            <el-form-item  prop="name" :style="{marginRight:0}">
+              <Transition name="goodsType" mode="out-in">
+                <el-button type="primary" @click="handleAddgoodsType(goodsTypeFormRef)" v-if="!goodsTypeInputShow" key="add">
+                  <el-icon><Plus /></el-icon>
+                  &emsp;新增商品类别
+                </el-button>
+                <el-input placeholder="请输入商品类别" v-model.string="goodsTypeForm.name"  v-else key="edit">
+                  <template #append>
+                    <el-button-group>
+                      <el-button class="btn-primary btn-append" @click="handleAddGoodsTypeOk(goodsTypeFormRef)">确认</el-button>
+                      <el-button class="btn-primary" @click="handleAddGoodsTypeCancel(goodsTypeFormRef)">取消</el-button>
+                    </el-button-group>
+                  </template>
+                </el-input>
+              </Transition>
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="goodsType-body">
+          <el-table :data="goodsTypeList" width="100%" :stripe="true" border>
+            <el-table-column label="商品类别" property="name" width="100" align="center" />
+            <el-table-column label="操作" align="center">
+              <template #default="scope">
+                <div style="display: flex; align-items: center ;justify-content: center;">
+                  <el-button type="primary" size="small" @click="handleEditGoodsType(scope.row)">修改</el-button>
+                  <el-button type="danger" size="small" @click="handleRemoveGoodsType(scope.row.id)">删除</el-button>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+    </DialogModel>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, reactive, ref, toRefs, watch, type PropType, type Ref } from 'vue'
+import { reactive, ref, watch, type Ref } from 'vue'
 import { type UploadProps, type UploadUserFile, type UploadInstance, type FormInstance, type FormRules, type UploadRawFile, genFileId, ElMessage } from 'element-plus'
-import DialogModel from '../../../util-model/DialogModel.vue'
 import api from '@/api'
 import type { GoodsTypeType } from '@/types/goods'
 import type GoodsType from '@/types/goods'
+import { Plus } from '@element-plus/icons-vue'
+import { Picture as IconPicture } from '@element-plus/icons-vue'
+import { debounce } from 'lodash'
 
 const emit = defineEmits(['open','opened','close','closed','ok'])
 const props = defineProps({
@@ -166,10 +229,14 @@ const goodsTypeList: Ref<GoodsTypeType[]> = ref([])
 
 const cropper = ref()
 const cropperShow = ref(false)
-const ruleFormRef = ref<FormInstance>()
+const goodsTypeDialogShow = ref(false)
+const goodsTypeInputShow = ref(false)
+const goodsFormRef = ref<FormInstance>()
+const goodsTypeFormRef = ref<FormInstance>()
+const goodsTypeState = ref('')
 const upload = ref<UploadInstance>()
 
-const oridinGoods = {
+const originGoods = {
   name: '',
   price: 0,
   desc: '',
@@ -179,7 +246,10 @@ const oridinGoods = {
   img: '',
   state: 0
 }
-const goodsForm:Ref<GoodsType> = ref(oridinGoods)
+const goodsForm:Ref<GoodsType> = ref(originGoods)
+const goodsTypeForm:Ref<GoodsTypeType> = ref({
+  name: ''
+})
 
 watch(()=>[props.state,props.goodsId,props.show],async ()=>{
   api.getGoodsTypeList().then(res=>{
@@ -192,7 +262,7 @@ watch(()=>[props.state,props.goodsId,props.show],async ()=>{
       goodsForm.value = data.data
     }
   }else{
-    goodsForm.value = oridinGoods
+    goodsForm.value = originGoods
   }
 },{deep:true, immediate: true})
 
@@ -208,7 +278,7 @@ const cropperOption = reactive({
   fixed: false
 })
 
-const rules = reactive<FormRules>({
+const goodsRules = reactive<FormRules>({
   typeId: [
     {
       required: true,
@@ -255,6 +325,31 @@ const rules = reactive<FormRules>({
     { message: '请输入商品简介', trigger: 'blur' },
   ],
 })
+
+const goodsTypeNameExist = (_rule: any, value: any, callback: any ) =>{
+  if(!value){
+    callback(new Error('请输入商品类别名称'))
+  }
+
+  api.checkIsExist('goodsType', goodsTypeForm.value).then(res=>{
+    if(res.status === 10000) callback(new Error(res.data.data.error))
+    if(res.data.data.length >= 1) callback(new Error('商品已存在'))
+    callback()
+  }).catch(err=>{
+    if(!(err.data.data.error instanceof Array)){
+      callback(new Error(err.data.data.error))
+    }
+  })
+}
+
+const goodsTypeRules = reactive<FormRules>({
+  name: [
+    { required: true, message: '请输入商品类别名称', trigger: 'blur' },
+    { min: 1, max: 12, message: '商品名在1到12个字之间', trigger: 'blur' },
+    { validator: debounce(goodsTypeNameExist, 200), trigger: 'change' }
+  ],
+})
+
 
 const handleExceed: UploadProps['onExceed'] = (files) => {
   upload.value?.clearFiles()
@@ -333,6 +428,74 @@ const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
 const handlePreview: UploadProps['onPreview'] = (file) => {
   console.log(file)
 }
+
+/**
+ * 新增goodsType按钮点击事件
+ */
+const handleAddgoodsType = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  goodsTypeState.value = 'add'
+  formEl.resetFields()
+  goodsTypeInputShow.value = true
+}
+
+/**
+ * 修改goodsType按钮点击事件
+ */
+const handleEditGoodsType = (goodsTypeData: GoodsTypeType) => {
+  goodsTypeState.value = 'edit'
+  goodsTypeForm.value = {...goodsTypeData}
+  goodsTypeInputShow.value = true
+}
+
+/**
+ * 删除goodsType
+ * @param id goodsType.id
+ */
+const handleRemoveGoodsType = async (id: string) => {
+  const { data } = await api.removeGoodsType(id)
+  if(data.status === 11111){
+    goodsTypeList.value = goodsTypeList.value.filter(goodsType=>goodsType.id !== id)
+    ElMessage.success('删除成功')
+  }else{
+    ElMessage.error(data.data)
+  }
+}
+
+const handleAddGoodsTypeOk = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid) => {
+    if (valid) {
+      console.log('newGoodsType',goodsTypeForm.value)
+      if(goodsTypeState.value === 'add'){
+        const { data } = await api.addGoodsType(goodsTypeForm.value)
+        if(data.status === 11111){
+          ElMessage.success('新增成功')
+          goodsTypeList.value.push(data.data)
+          formEl.resetFields()
+        }else{
+          ElMessage.error(data.data.error)
+        }
+      }else if(goodsTypeState.value === 'edit' && goodsTypeForm.value.id){
+        const { data } = await api.editGoodsType(goodsTypeForm.value.id, goodsTypeForm.value)
+        if(data.status === 11111){
+          ElMessage.success('修改成功')
+          goodsTypeList.value.find(goodsType=>(goodsType.id === goodsTypeForm.value.id))!.name = goodsTypeForm.value.name
+        }else{
+          ElMessage.error(data.data.error)
+        }
+      }
+    }
+  })
+}
+
+const handleAddGoodsTypeCancel = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  if(goodsTypeState.value === 'add'){
+    formEl.resetFields()
+  }
+  goodsTypeInputShow.value = false
+}
 </script>
 
 <style lang="less" scoped>
@@ -341,6 +504,9 @@ const handlePreview: UploadProps['onPreview'] = (file) => {
   .form{
     flex-basis: 500px;
     padding: 0 10px;
+    .form-body{
+      margin-top: 10px;
+    }
   }
   .preview{
     flex: auto;
@@ -447,5 +613,34 @@ const handlePreview: UploadProps['onPreview'] = (file) => {
     width: 350px;
     height: 350px;
   }
+  .goodsType-enter-active,
+  .goodsType-leave-active {
+    transition: all 0.25s ease;
+  }
+
+  .goodsType-enter-from{
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  .goodsType-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  .goodsType-leave-from{
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .goodsType-enter-to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .el-image {
+  padding: 0 5px;
+  max-width: 300px;
+  max-height: 200px;
+  width: 100%;
+  height: 200px;
+}
 }
 </style>

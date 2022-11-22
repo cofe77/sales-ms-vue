@@ -1,15 +1,15 @@
 export default interface VipType {
-  id: string,
+  id?: string,
   name: string,
-  level: string,
-  tel: number,
+  typeId: string,
+  tel: string,
+  state: number,
   balance: number,
-  createTime: string
+  updateTime?: string
 }
 
 export interface VipTypeType {
-  id: string,
+  id?: string,
   name: string,
-  discount: number,
-  updateTime: string
+  discount: number
 }

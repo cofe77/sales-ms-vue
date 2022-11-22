@@ -2,32 +2,52 @@
   <div class="carousel">
     <div class="top">
       <div class="workstation">
-        <el-form
-          ref="ruleFormRef"
-          :model="ruleForm"
-          :rules="rules"
-          label-width="80px"
-          class="demo-ruleForm"
-          :size="formSize"
-          status-icon
+        <el-upload
+          ref="upload"
+          class="upload"
+          v-model:file-list="fileList"
+          :on-preview="handlePreview"
+          :on-remove="handleRemove"
+          list-type="picture"
+          :auto-upload="false"
+          :on-change="handleChange"
+          :limit="1"
+          :on-exceed="handleExceed"
+          :show-file-list="false"
         >
-          <el-form-item label="商品名称" prop="name">
-            <el-input v-model="ruleForm.name" />
-          </el-form-item>
-        </el-form>
-        <div class="upload">
-          <el-icon :size="80"><Plus /></el-icon>
-        </div>
+          <el-icon :size="80" class="upload-icon"><Plus /></el-icon>
+        </el-upload>
       </div>
       <div class="preview">
-
+        <div class="preview-carousel">
+          <el-carousel v-if="carouselList.length" trigger="click" width="293px" height="356px" >
+            <el-carousel-item v-for="img in carouselAvailableList" :key="img.id">
+              <el-image :title="img.title" :src="img.src" class="carousel-img" alt="">
+                <template #error>
+                  <div class="image-slot">
+                    <el-icon><icon-picture /></el-icon>
+                  </div>
+                </template>
+              </el-image>
+            </el-carousel-item>
+          </el-carousel>
+        </div>
       </div>
     </div>
     <div class="bottom">
-      <el-table :data="carouselData" width="100%" :stripe="true" border>
-        <el-table-column label="图片ID" property="id" width="100" />
-        <el-table-column label="title" property="id" width="100" />
-        <el-table-column label="href" property="id" />
+      <el-table :data="carouselList" width="100%" :stripe="true" border>
+        <el-table-column label="title" property="title">
+          <template #default="scope">
+            <span v-if="scope.row.title">{{scope.row.title}}</span>
+            <span v-else style="color:red">尽快补充信息</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="href" property="href">
+          <template #default="scope">
+            <span v-if="scope.row.href">{{scope.row.href}}</span>
+            <span v-else style="color:red">尽快补充信息</span>
+          </template>
+        </el-table-column>
         <el-table-column label="图片" width="60">
           <template #default="scope">
             <img :src="scope.row.src" width="40" alt="" srcset="">
@@ -46,192 +66,235 @@
               <el-button
                 type="primary"
                 :icon="ArrowUp"
-                @click="handleUp(scope.row.id)"
+                @click="handleEditIndex(scope.$index, scope.row.id,-1)"
+                :disabled="scope.row.id === carouselList[0]?.id"
               ></el-button>
-              <el-button type="primary" :icon="ArrowDown"></el-button>
+              <el-button type="primary" :icon="ArrowDown"
+                @click="handleEditIndex(scope.$index, scope.row.id,1)"
+                :disabled="scope.row.id === carouselList[carouselList.length-1]?.id"
+              ></el-button>
             </el-button-group>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="scope">
             <div style="display: flex; align-items: center">
-              <el-button type="warning" size="small" @click="handleEdit(scope.$index, scope.row)">禁用</el-button>
-              <el-button type="primary" size="small" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
-              <el-button type="danger" size="small" @click="handleEdit(scope.$index, scope.row)">删除</el-button>
+              <el-button v-if="scope.row.state === 1" type="warning" size="small" @click="handlePullCarousel(scope.row.id, 0)">禁用</el-button>
+              <el-button v-else type="danger" size="small" @click="handlePullCarousel(scope.row.id, 1)">启用</el-button>
+              <el-button type="primary" size="small" @click="handleEditCarousel(scope.row)">修改</el-button>
+              <el-button type="danger" size="small" @click="handleRemoveCarsouel(scope.row.id)">删除</el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
     </div>
+    <DialogModel :show="cropperShow" title="" width="400px" @ok="handleCropperOk" @closed="cropperShow = false">
+      <div class="img-cropper">
+        <vueCropper
+          ref="cropper"
+          :img="cropperOption.img"
+          :outputSize="cropperOption.size"
+          :outputType="cropperOption.outputType"
+          :autoCrop="cropperOption.autoCrop"
+          :autoCropWidth="cropperOption.autoCropWidth"
+          :autoCropHeight="cropperOption.autoCropHeight"
+          :fixed="cropperOption.fixed"
+        ></vueCropper>
+      </div>
+    </DialogModel>
+    <DialogModel 
+      :show="carouselEditDialogShow" 
+      title="修改"
+      @closed="carouselEditDialogShow = false"
+      @close="carouseEditDialogClose"
+      @ok="carouseEditDialogOk"
+    >
+      <el-form
+        ref="carouselFormRef"
+        :model="carouselForm"
+        :rules="carouselRules"
+        label-width="60px"
+        class="demo-ruleForm"
+        size="default"
+        status-icon
+       >
+        <el-form-item label="title" prop="title">
+          <el-input  v-model="carouselForm.title" type="textarea" />
+        </el-form-item>
+        <el-form-item label="href" prop="href">
+          <el-input  v-model="carouselForm.href" type="textarea" />
+        </el-form-item>
+      </el-form>
+    </DialogModel>
   </div>
 </template>
 
 <script lang="ts" setup>
 import type CarouselType from '@/types/carousel'
-import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage, genFileId, type FormInstance, type FormRules, type UploadInstance, type UploadProps, type UploadRawFile, type UploadUserFile } from 'element-plus'
 import moment from 'moment'
-import { ref, reactive } from 'vue'
+import { ref, reactive, type Ref, computed } from 'vue'
 import {
   ArrowDown,
   ArrowUp,
 } from '@element-plus/icons-vue'
+import api from '@/api'
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 
-const formSize = ref('default')
-const ruleFormRef = ref<FormInstance>()
-const ruleForm = reactive({
-  name: 'Hello',
-  region: '',
-  count: '',
-  date1: '',
-  date2: '',
-  delivery: false,
-  type: [],
-  resource: '',
-  desc: '',
+const carouselList: Ref<CarouselType[]> = ref([])
+const cropper = ref()
+const upload = ref<UploadInstance>()
+const cropperShow = ref(false)
+const carouselEditDialogShow = ref(false)
+const carouselSrc = ref('')
+const fileList = ref<UploadUserFile[]>([])
+const carouselAvailableList = computed(()=>carouselList.value.filter(carousel=>carousel.state === 1))
+
+const cropperOption = reactive({
+  img: '',
+  size: 1,
+  outputType: 'jpg',
+  autoCrop: true,
+  autoCropWidth: 293,
+  autoCropHeight: 356,
+  fixed: false
 })
 
-const rules = reactive<FormRules>({
-  name: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 3, max: 5, message: 'Length should be 3 to 5', trigger: 'blur' },
+const initData = async () => {
+  const { data } = await api.getCarouselList()
+  if(data.status === 11111){
+    carouselList.value = data.data
+  }
+}
+
+initData()
+
+const originCarousel = {
+  id: '',
+  title: '',
+  href: ''
+}
+
+const carouselForm: Ref<CarouselType> = ref(originCarousel)
+const carouselFormRef = ref<FormInstance>()
+
+const carouselRules = reactive<FormRules>({
+  title: [
+    { required: true }
   ],
-  region: [
-    {
-      required: true,
-      message: 'Please select Activity zone',
-      trigger: 'change',
-    },
-  ],
-  count: [
-    {
-      required: true,
-      message: 'Please select Activity count',
-      trigger: 'change',
-    },
-  ],
-  date1: [
-    {
-      type: 'date',
-      required: true,
-      message: 'Please pick a date',
-      trigger: 'change',
-    },
-  ],
-  date2: [
-    {
-      type: 'date',
-      required: true,
-      message: 'Please pick a time',
-      trigger: 'change',
-    },
-  ],
-  type: [
-    {
-      type: 'array',
-      required: true,
-      message: 'Please select at least one activity type',
-      trigger: 'change',
-    },
-  ],
-  resource: [
-    {
-      required: true,
-      message: 'Please select activity resource',
-      trigger: 'change',
-    },
-  ],
-  desc: [
-    { required: true, message: 'Please input activity form', trigger: 'blur' },
-  ],
+  href: [
+    { required: true }
+  ]
 })
 
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  await formEl.validate((valid, fields) => {
-    if (valid) {
-      console.log('submit!')
-    } else {
-      console.log('error submit!', fields)
+const handleCropperOk = () => {
+  cropper.value.getCropBlob(async (imgBlob: any)=>{
+    const imgFormData = new FormData()
+    imgFormData.append('jpg',imgBlob)
+    const { data } = await api.imgUpload(imgFormData)
+    if(data.status === 11111){
+
+      //生产环境
+      // carouselSrc.value = data.data
+      //开发环境
+      carouselSrc.value = 'http://localhost:3002'+data.data
+
+      fileList.value = []
+      fileList.value.push({
+        name: data.data,
+        url: carouselSrc.value
+      })
+      api.addCarousel({src:carouselSrc.value}).then(res=>{
+        if(res.data.status === 11111){
+          initData()
+          ElMessage.success('上传成功')
+        }
+      })
     }
   })
+  cropperShow.value = false
 }
 
-const resetForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
+
+const handleChange: UploadProps['onChange'] = (uploadFile) => {
+  cropperShow.value = true
+  carouselSrc.value = ''
+  cropperOption.img = ''
+  if(uploadFile.url){
+    cropperOption.img = uploadFile.url
+  }
 }
 
-const carouselData: CarouselType[] = [
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-  {
-    id: '1',
-    src: '/static/image/beer.png',
-    enable: 1,
-    title: 'number',
-    href: 'string',
-    image_idx: 1,
-    updateTime: new Date().toDateString()
-  },
-]
+const handleRemove: UploadProps['onRemove'] = (uploadFile, uploadFiles) => {
+  console.log(uploadFile, uploadFiles)
+}
 
-const handleEdit = (index: number, rowData: CarouselType) => {
-  console.log('rowData',rowData)
-  console.log('index',index)
+const handlePreview: UploadProps['onPreview'] = (file) => {
+  console.log(file)
 }
-const handleSizeChange = (index: number, rowData: CarouselType) => {
-  console.log('rowData',rowData)
-  console.log('index',index)
+const handleExceed: UploadProps['onExceed'] = (files) => {
+  upload.value?.clearFiles()
+  const file = files[0] as UploadRawFile
+  file.uid = genFileId()
+  upload.value?.handleStart(file)
 }
-const handleCurrentChange = (index: number, rowData: CarouselType) => {
-  console.log('rowData',rowData)
-  console.log('index',index)
+
+const handlePullCarousel = async (id: string, state: number) => {
+  const { data } = await api.pullCarousel(id, state)
+  if(data.status === 11111){
+    carouselList.value.find(carousel=>carousel.id === id)!.state = state
+    ElMessage.success(`${state===1?'启用':'禁用'}成功`)
+  }
 }
-const handleUp = (id:string) => {
-  console.log('id',id)
+
+const handleEditCarousel = (rowData: CarouselType) => {
+  console.log('rowData',rowData)
+  carouselForm.value = {...rowData}
+  carouselEditDialogShow.value = true
+}
+
+const carouseEditDialogOk= () => {
+  if(!carouselFormRef.value) return
+  carouselFormRef.value.validate(async (valid) => {
+    if (valid && carouselForm.value.id) {
+      const { data } = await api.editCarousel(carouselForm.value.id, {title:carouselForm.value.title, href:carouselForm.value.href})
+      if(data.status === 11111){
+        ElMessage.success('修改成功')
+        initData()
+      }else{
+        ElMessage.error(data.data.error)
+      }
+    }
+  })
+  carouselEditDialogShow.value = false
+}
+
+const carouseEditDialogClose = () => {
+  carouselForm.value = originCarousel
+  carouselEditDialogShow.value = false
+}
+
+const handleEditIndex = async (_index: number, id:string, diff: number) => {
+  let targetId
+  if(diff === 1){//往后调
+    targetId = carouselList.value[_index+1].id
+  }else if(diff === -1){//往前调
+    targetId = carouselList.value[_index-1].id
+  }
+  if(!targetId) return
+  const { data } = await api.editCarouselIndex(id,targetId)
+  if(data.status === 11111){
+    initData()
+    ElMessage.success('修改成功')
+  }
+}
+
+const handleRemoveCarsouel = async (id: string) => {
+  const { data } = await api.removeCarousel(id)
+  if(data.status === 11111){
+    carouselList.value = carouselList.value.filter(carousel=>carousel.id !== id)
+    ElMessage.success('删除成功')
+  }
 }
 </script>
 
@@ -240,30 +303,62 @@ const handleUp = (id:string) => {
   .top{
     display: flex;
     .workstation{
-      width: 512px;
       display: flex;
       margin-right: 10px;
       padding: 10px;
       .div-bordered();
       .upload{
-        width: 200px;
+        width: 293px;
+        height: 356px;
+        border-radius: 5px;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin-left: 10px;
+        border-style: dotted;
         .div-bordered();
+        .upload-icon{
+          width: 293px;
+          height: 356px;
+        }
+        &:hover {
+          border-color: var(--el-color-primary);
+        }
       }
     }
     .preview{
       width: 512px;
       height: 384px;
+      position: relative;
       background-image: url('/static/image/首页.png');
       background-repeat: no-repeat;
       background-size: cover;
+      .preview-carousel{
+        width: 293px;
+        height: 356px;
+        position: absolute;
+        right: 14px;
+        top: 15px;
+        border-radius: 5px;
+        .carousel-img{
+          width: 293px;
+          height: 356px;
+          border-radius: 5px;
+        }
+        :deep(.el-carousel__button){
+          width: 5px;
+          height: 5px;
+          border-radius: 999px;
+        }
+      }
     }
   }
   .bottom{
     margin-top: 10px;
+  }
+  .img-cropper{
+    width: 293px;
+    height: 356px;
   }
 }
 </style>

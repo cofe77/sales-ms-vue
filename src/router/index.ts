@@ -12,13 +12,13 @@ import PcSearchVue from '@/components/PC/PcSearch.vue'
 import AdminHomeVue from '@/components/admin/AdminHome.vue'
 import AdminLoginVue from '@/components/admin/AdminLogin.vue'
 import GoodsManageVue from '@/components/admin/Goods/GoodsManage.vue'
-import DeskManageVue from '@/components/admin/DeskManage.vue'
-import UserManageVue from '@/components/admin/UserManage.vue'
+import DeskManageVue from '@/components/admin/Desk/DeskManage.vue'
+import StaffManageVue from '@/components/admin/Staff/StaffManage.vue'
 import CarouselManageVue from '@/components/admin/CarouselManage.vue'
 import SavedBeerManageVue from '@/components/admin/SavedBeerManage.vue'
 import AnalyseViewVue from '@/components/admin/AnalyseView.vue'
-import VIPManageVue from '@/components/admin/VIPManage.vue'
 import OrderManageVue from '@/components/admin/OrderManage.vue'
+import VipManageVue from '@/components/admin/Vip/VipManage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -76,12 +76,12 @@ const router = createRouter({
           component: DeskManageVue
         },
         {
-          path: 'user',//点餐
-          component: UserManageVue
+          path: 'staff',//点餐
+          component: StaffManageVue
         },
         {
           path: 'vip',//vip
-          component: VIPManageVue
+          component: VipManageVue
         },
         {
           path: 'carousel',//库存

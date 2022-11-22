@@ -15,7 +15,7 @@ export const AdminRoute = [
     name: '桌位'
   },
   {
-    path: '/admin/user',
+    path: '/admin/staff',
     icon: 'User',
     name: '员工'
   },

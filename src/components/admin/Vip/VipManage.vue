@@ -100,9 +100,9 @@ const handleAddUser = () => {
 const currentPage1 = ref(5)
 
 const handlePullVip = async (id: string, state: number) => {
-  const { data } = await api.pullGoods(id, state)
+  const { data } = await api.pullVip(id, state)
   if(data.status === 11111){
-    vipList.value.find(goods=>goods.id === id)!.state = state
+    vipList.value.find(vip=>vip.id === id)!.state = state
     ElMessage.success(`${state===1?'解冻':'冻结'}成功`)
   }
 }

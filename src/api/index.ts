@@ -305,7 +305,7 @@ const api: ApiObject = {
     return axios.patch(base.baseUrl + base.editCarousel + '/' + id, data)
   },
   editCarouselIndex(currentId, targetId){
-    return axios.patch(base.baseUrl + base.editCarouselIndex + '/' + currentId, { targetId })
+    return axios.patch(base.baseUrl + base.editCarouselIndex + '/' + currentId, { id:targetId })
   },
   pullCarousel(id, state){
     return axios.patch(base.baseUrl + base.pullCarousel + '/' + id, { state } )

@@ -43,7 +43,7 @@ const pcLinkTo = (target:string) => {
   router.push(target)
 }
 
-const socket = io('http://192.168.1.2:3001',{
+const socket = io('http://192.168.1.5:3001',{
   transports: ['websocket']
 })
 

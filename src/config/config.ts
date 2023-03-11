@@ -1,0 +1,3 @@
+export enum HTTP_STATUS_CODE {
+  GET_OK=11111
+}

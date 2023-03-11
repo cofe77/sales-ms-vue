@@ -20,7 +20,7 @@
       </div>
       <div class="preview">
         <div class="preview-carousel">
-          <el-carousel v-if="carouselList.length" trigger="click" width="293px" height="356px" >
+          <el-carousel v-if="carouselAvailableList[0]" width="293px" height="356px" >
             <el-carousel-item v-for="img in carouselAvailableList" :key="img.id">
               <el-image :title="img.title" :src="img.src" class="carousel-img" alt="">
                 <template #error>
@@ -140,6 +140,7 @@ import {
 } from '@element-plus/icons-vue'
 import api from '@/api'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
+import { HTTP_STATUS_CODE } from '@/config/config'
 
 const carouselList: Ref<CarouselType[]> = ref([])
 const cropper = ref()
@@ -162,8 +163,8 @@ const cropperOption = reactive({
 
 const initData = async () => {
   const { data } = await api.getCarouselList()
-  if(data.status === 11111){
-    carouselList.value = data.data
+  if (data.status === 11111) {
+    carouselList.value = data.data.sort((a: CarouselType, b: CarouselType) => a.idx! - b.idx!)
   }
 }
 
@@ -171,6 +172,7 @@ initData()
 
 const originCarousel = {
   id: '',
+  src: '',
   title: '',
   href: ''
 }
@@ -283,7 +285,7 @@ const handleEditIndex = async (_index: number, id:string, diff: number) => {
   }
   if(!targetId) return
   const { data } = await api.editCarouselIndex(id,targetId)
-  if(data.status === 11111){
+  if (data.status === HTTP_STATUS_CODE.GET_OK) {
     initData()
     ElMessage.success('修改成功')
   }
@@ -291,7 +293,7 @@ const handleEditIndex = async (_index: number, id:string, diff: number) => {
 
 const handleRemoveCarsouel = async (id: string) => {
   const { data } = await api.removeCarousel(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.GET_OK){
     carouselList.value = carouselList.value.filter(carousel=>carousel.id !== id)
     ElMessage.success('删除成功')
   }

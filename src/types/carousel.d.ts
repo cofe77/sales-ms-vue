@@ -1,6 +1,6 @@
 export default interface CarouselType {
   id?: string,
-  src: string,
+  src?: string,
   state?: number,
   title?: string,
   href?: string,

@@ -90,6 +90,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type GoodsType from '@/types/goods'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -129,7 +130,7 @@ const handleGoodsAdd = () => {
 
 const handleGoodsPull = async (id: string, state: number) => {
   const { data } = await api.pullGoods(id, state)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     goodsData.value.find(goods=>goods.id === id)!.state = state
     ElMessage.success(`${state===1?'上架':'下架'}成功`)
   }
@@ -144,7 +145,7 @@ const handleGoodsEdit = (rowData: GoodsType) => {
 }
 const handleGoodsRemove = async (id: string) => {
   const { data } = await api.removeGoods(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     goodsData.value = goodsData.value.filter(goods=>goods.id !== id)
     ElMessage.success('删除成功')
   }else{

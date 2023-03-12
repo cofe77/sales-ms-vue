@@ -163,7 +163,7 @@ const cropperOption = reactive({
 
 const initData = async () => {
   const { data } = await api.getCarouselList()
-  if (data.status === 11111) {
+  if (data.status === HTTP_STATUS_CODE.HTTP_OK) {
     carouselList.value = data.data.sort((a: CarouselType, b: CarouselType) => a.idx! - b.idx!)
   }
 }
@@ -194,7 +194,7 @@ const handleCropperOk = () => {
     const imgFormData = new FormData()
     imgFormData.append('jpg',imgBlob)
     const { data } = await api.imgUpload(imgFormData)
-    if(data.status === 11111){
+    if(data.status === HTTP_STATUS_CODE.HTTP_OK){
 
       //生产环境
       // carouselSrc.value = data.data
@@ -207,7 +207,7 @@ const handleCropperOk = () => {
         url: carouselSrc.value
       })
       api.addCarousel({src:carouselSrc.value}).then(res=>{
-        if(res.data.status === 11111){
+        if(res.data.status === HTTP_STATUS_CODE.HTTP_OK){
           initData()
           ElMessage.success('上传成功')
         }
@@ -243,7 +243,7 @@ const handleExceed: UploadProps['onExceed'] = (files) => {
 
 const handlePullCarousel = async (id: string, state: number) => {
   const { data } = await api.pullCarousel(id, state)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     carouselList.value.find(carousel=>carousel.id === id)!.state = state
     ElMessage.success(`${state===1?'启用':'禁用'}成功`)
   }
@@ -260,7 +260,7 @@ const carouseEditDialogOk= () => {
   carouselFormRef.value.validate(async (valid) => {
     if (valid && carouselForm.value.id) {
       const { data } = await api.editCarousel(carouselForm.value.id, {title:carouselForm.value.title, href:carouselForm.value.href})
-      if(data.status === 11111){
+      if(data.status === HTTP_STATUS_CODE.HTTP_OK){
         ElMessage.success('修改成功')
         initData()
       }else{
@@ -285,7 +285,7 @@ const handleEditIndex = async (_index: number, id:string, diff: number) => {
   }
   if(!targetId) return
   const { data } = await api.editCarouselIndex(id,targetId)
-  if (data.status === HTTP_STATUS_CODE.GET_OK) {
+  if (data.status === HTTP_STATUS_CODE.HTTP_OK) {
     initData()
     ElMessage.success('修改成功')
   }
@@ -293,7 +293,7 @@ const handleEditIndex = async (_index: number, id:string, diff: number) => {
 
 const handleRemoveCarsouel = async (id: string) => {
   const { data } = await api.removeCarousel(id)
-  if(data.status === HTTP_STATUS_CODE.GET_OK){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     carouselList.value = carouselList.value.filter(carousel=>carousel.id !== id)
     ElMessage.success('删除成功')
   }

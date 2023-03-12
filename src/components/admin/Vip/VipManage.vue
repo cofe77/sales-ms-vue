@@ -66,6 +66,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type VipType from '@/types/vip'
 import { ElMessage } from 'element-plus'
 import moment from 'moment'
@@ -80,7 +81,7 @@ const vipId = ref('')
 
 const initData = () => {
   api.getVipWithType().then(res=>{
-    if(res.data.status === 11111){
+    if(res.data.status === HTTP_STATUS_CODE.HTTP_OK){
       vipList.value = res.data.data
     }
   })
@@ -101,7 +102,7 @@ const currentPage1 = ref(5)
 
 const handlePullVip = async (id: string, state: number) => {
   const { data } = await api.pullVip(id, state)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     vipList.value.find(vip=>vip.id === id)!.state = state
     ElMessage.success(`${state===1?'解冻':'冻结'}成功`)
   }
@@ -115,7 +116,7 @@ const handleEditVip = (rowData: VipType) => {
 }
 const handleRemoveVip = async (id: string) => {
   const { data } = await api.removeVip(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     vipList.value = vipList.value.filter(vip=>vip.id !== id)
     ElMessage.success('删除成功')
   }else{

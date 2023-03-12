@@ -74,6 +74,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type DeskType from '@/types/desk'
 import type { DeskTypeType } from '@/types/desk'
 import { Plus } from '@element-plus/icons-vue'
@@ -120,7 +121,7 @@ const deskRules = reactive<FormRules>({
 
 const initData = async () => {
   const { data } = await api.getDeskType()
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     deskTypeList.value = data.data
   }
 }
@@ -133,7 +134,7 @@ const deskTypeNameExist = (_rule: any, value: any, callback: any ) =>{
   }
 
   api.checkIsExist('deskType', deskTypeForm.value).then(res=>{
-    if(res.status === 10000) callback(new Error(res.data.data.error))
+    if(res.status !== HTTP_STATUS_CODE.HTTP_OK) callback(new Error(res.data.data.error))
     if(res.data.data.length >= 1) callback(new Error('桌位已存在'))
     callback()
   }).catch(err=>{
@@ -157,7 +158,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   await formEl.validate(async (valid) => {
     if (valid) {
       const { data } = await api.addDesk(deskForm.value)
-      if(data.status === 11111){
+      if(data.status === HTTP_STATUS_CODE.HTTP_OK){
         ElMessage.success('新增成功')
         emit('close')
       }else{
@@ -201,7 +202,7 @@ const handleEditDeskType = (deskTypeData: DeskTypeType) => {
  */
 const handleRemoveDeskType = async (id: string) => {
   const { data } = await api.removeDeskType(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     deskTypeList.value = deskTypeList.value.filter(deskType=>deskType.id !== id)
     ElMessage.success('删除成功')
   }else{
@@ -217,7 +218,7 @@ const handleAddDeskTypeOk = async (formEl: FormInstance | undefined) => {
     if (valid) {
       if(deskTypeState.value === 'add'){
         const { data } = await api.addDeskType(deskTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('新增成功')
           deskTypeList.value.push(data.data)
           formEl.resetFields()
@@ -226,7 +227,7 @@ const handleAddDeskTypeOk = async (formEl: FormInstance | undefined) => {
         }
       }else if(deskTypeState.value === 'edit' && deskTypeForm.value.id){
         const { data } = await api.editDeskType(deskTypeForm.value.id, deskTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('修改成功')
           deskTypeList.value.find(deskType=>(deskType.id === deskTypeForm.value.id))!.name = deskTypeForm.value.name
         }else{

@@ -1,3 +1,5 @@
+
+import GoodsType from './goods.d'
 export default interface OrderType {
   id: string,
   deskId: string,
@@ -9,4 +11,13 @@ export default interface OrderType {
   cash: number,
   onlinePay: number,
   createTime: string
+}
+
+export interface CreateOrderType {
+  deskId: string,
+  staffId: string,
+  goods: {
+    item: GoodsType,
+    count: number
+  }[]
 }

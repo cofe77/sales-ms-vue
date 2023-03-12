@@ -31,6 +31,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type DeskType from '@/types/desk'
 import DialogModel from '@/util-model/DialogModel.vue'
 import { ElMessage } from 'element-plus'
@@ -54,7 +55,7 @@ const closed = () => {
 
 const handleRemoveDesk = async (id: string) => {
   const { data } = await api.removeDesk(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     deskList.value = deskList.value.filter(desk=>desk.id !== id)
     ElMessage.success('删除成功')
   }else{

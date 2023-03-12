@@ -18,7 +18,7 @@
           <div class="waitForSend-name">{{item.goods?.name || ''}}({{item.desk?.name}})</div>
           <div class="waitForSend-count">×{{item.count}}</div>
           <div class="waitForSend-confirm">
-            <div class="waitForSend-confirm-btn" @click="handleDispatch(item.id)">确认</div>
+            <div class="waitForSend-confirm-btn" @click="handleDispatch(item.id!)">确认</div>
           </div>
         </div>
       </div>

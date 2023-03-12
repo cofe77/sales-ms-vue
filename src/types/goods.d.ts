@@ -17,6 +17,7 @@ export default interface GoodsType {
 export interface GoodsTypeType {
   id?: string,
   name: string,
+  goods?: GoodsType[],
 }
 
 export interface OrderGoodsType {

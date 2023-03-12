@@ -210,6 +210,7 @@ import type GoodsType from '@/types/goods'
 import { Plus } from '@element-plus/icons-vue'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { debounce } from 'lodash'
+import { HTTP_STATUS_CODE } from '@/config/config'
 
 const emit = defineEmits(['open','opened','close','closed','ok'])
 const props = defineProps({
@@ -258,7 +259,7 @@ watch(()=>[props.state,props.goodsId,props.show],async ()=>{
   console.log('1111')
   if(props.goodsId && props.state === 'edit'){
     const { data } = await api.getGoodsById(props.goodsId)
-    if(data.status === 11111){
+    if(data.status === HTTP_STATUS_CODE.HTTP_OK){
       goodsForm.value = data.data
     }
   }else{
@@ -331,8 +332,8 @@ const goodsTypeNameExist = (_rule: any, value: any, callback: any ) =>{
     callback(new Error('请输入商品类别名称'))
   }
 
-  api.checkIsExist('goodsType', goodsTypeForm.value).then(res=>{
-    if(res.status === 10000) callback(new Error(res.data.data.error))
+  api.checkIsExist('goodsType', goodsTypeForm.value).then(res => {
+    if(res.status !== 201) callback(new Error(res.data.data.error))
     if(res.data.data.length >= 1) callback(new Error('商品已存在'))
     callback()
   }).catch(err=>{
@@ -363,7 +364,7 @@ const handleCropperOk = () => {
     const imgFormData = new FormData()
     imgFormData.append('jpg',imgBlob)
     const { data } = await api.imgUpload(imgFormData)
-    if(data.status === 11111){
+    if(data.status === HTTP_STATUS_CODE.HTTP_OK){
 
       //生产环境
       // goodsForm.img = data.data
@@ -387,7 +388,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       if(props.state === 'add'){
         const { data } = await api.addGoods(goodsForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('新增成功')
           emit('close')
         }else{
@@ -395,7 +396,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         }
       }else if(props.state === 'edit' && goodsForm.value.id){
         const { data } = await api.editGoods(goodsForm.value.id, goodsForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('修改成功')
           emit('close')
         }else{
@@ -454,7 +455,7 @@ const handleEditGoodsType = (goodsTypeData: GoodsTypeType) => {
  */
 const handleRemoveGoodsType = async (id: string) => {
   const { data } = await api.removeGoodsType(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     goodsTypeList.value = goodsTypeList.value.filter(goodsType=>goodsType.id !== id)
     ElMessage.success('删除成功')
   }else{
@@ -469,7 +470,7 @@ const handleAddGoodsTypeOk = async (formEl: FormInstance | undefined) => {
       console.log('newGoodsType',goodsTypeForm.value)
       if(goodsTypeState.value === 'add'){
         const { data } = await api.addGoodsType(goodsTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('新增成功')
           goodsTypeList.value.push(data.data)
           formEl.resetFields()
@@ -478,7 +479,7 @@ const handleAddGoodsTypeOk = async (formEl: FormInstance | undefined) => {
         }
       }else if(goodsTypeState.value === 'edit' && goodsTypeForm.value.id){
         const { data } = await api.editGoodsType(goodsTypeForm.value.id, goodsTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('修改成功')
           goodsTypeList.value.find(goodsType=>(goodsType.id === goodsTypeForm.value.id))!.name = goodsTypeForm.value.name
         }else{

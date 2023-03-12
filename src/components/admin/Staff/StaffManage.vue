@@ -91,6 +91,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type StaffType from '@/types/staff'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import moment from 'moment'
@@ -106,7 +107,7 @@ const staffState = ref('')
 
 const initData = () => {
   api.getStaffList().then(res=>{
-    if(res.data.status === 11111){
+    if(res.data.status === HTTP_STATUS_CODE.HTTP_OK){
       staffList.value = res.data.data
     }
   })
@@ -224,7 +225,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     if (valid) {
       if(staffState.value === 'add'){
         const { data } = await api.addStaff(staffForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('新增成功')
           const newStaff = data.data
           newStaff.password2 = data.data.password
@@ -238,7 +239,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         delete staffForm.value.password2
         delete staffForm.value.updateTime
         const { data } = await api.editStaff(id, staffForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('修改成功')
           initData()
           staffDialogShow.value = false
@@ -257,7 +258,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
 
 const handlePullStaff = async (id: string, state: number) => {
   const { data } = await api.pullStaff(id, state)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     staffList.value.find(staff=>staff.id === id)!.state = state
     ElMessage.success(`${state===1?'启用':'禁用'}成功`)
   }
@@ -273,7 +274,7 @@ const handleEditStaff = (staff: StaffType) => {
 
 const handleRemoveStaff = async (id: string) => {
   const { data } = await api.removeStaff(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     staffList.value = staffList.value.filter(staff=>staff.id !== id)
     ElMessage.success('删除成功')
   }else{

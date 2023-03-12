@@ -2,16 +2,21 @@
   <div class="pc-order">
     <div class="goods-type-container">
       <div class="goods-type-header">分类</div>
-      <div v-for="goodsType in goodsTypeArr" :key="goodsType.id" :class="['goods-type-item',{'goods-type-item-on':goodsType.id === ''}]">酒水</div>
+      <div 
+        v-for="goodsType in goodsTypeArr" 
+        :key="goodsType.id" 
+        :class="['goods-type-item',{'goods-type-item-on':goodsType.id === currentGoodsTypeId}]"
+        @click="handleClickGoodsType(goodsType.id!)"
+      >{{goodsType.name}}</div>
     </div>
     <div class="goods-container">
-      <div v-for="i in 20" :key="i" class="goods">
+      <div v-for="goods in currentGoodsType?.goods" :key="goods.id" class="goods">
         <div class="goods-img">
-          <img src="../../../static/image/beer.png" alt="">
+          <img :src="goods.img" alt="">
         </div>
-        <div class="goods-name">啤酒（罐）</div>
-        <div class="goods-desc">雪花</div>
-        <div class="goods-price">8.00元</div>
+        <div class="goods-name">{{goods.name}}</div>
+        <div class="goods-desc">{{goods.desc}}</div>
+        <div class="goods-price">{{goods.price}}元</div>
       </div>
     </div>
     <div class="order-operation">
@@ -22,10 +27,10 @@
           <div class="order-item-count">数量</div>
           <div class="order-item-price">价格</div>
         </div>
-        <div v-for="i in 10" :key="i" class="order-item">
-          <div class="order-item-name">啤酒（罐）</div>
-          <div class="order-item-count">×100</div>
-          <div class="order-item-price">80000.00</div>
+        <div v-for="orderGoods in order.goods" :key="orderGoods.item.id" class="order-item">
+          <div class="order-item-name">{{orderGoods.item.name}}</div>
+          <div class="order-item-count">×{{orderGoods.count}}</div>
+          <div class="order-item-price">{{orderGoods.item.price}}</div>
         </div>
       </div>
       <div class="order-operation-total">
@@ -43,13 +48,33 @@
 <script lang="ts" setup>
 import api from '@/api'
 import type { GoodsTypeType } from '@/types/goods'
-import { ref, type Ref } from 'vue'
+import type { CreateOrderType } from '@/types/order'
+import { computed, reactive, ref, type Ref } from 'vue'
 
 const goodsTypeArr: Ref<GoodsTypeType[]> = ref([])
+const currentGoodsTypeId = ref('')
+const currentGoodsType = computed(() => goodsTypeArr.value.find(type => type.id === currentGoodsTypeId.value))
 
-api.getGoodsTypeWithGoods().then(res=>{
-  goodsTypeArr.value = res.data
-})
+const originOrderData: CreateOrderType = {
+  deskId: '',
+  staffId: '',
+  goods: []
+}
+
+const order = reactive(originOrderData)
+
+const initData = () => {
+  api.getGoodsTypeWithGoods().then(res => {
+    goodsTypeArr.value = res.data.data
+    currentGoodsTypeId.value = goodsTypeArr.value[0].id!
+  })
+}
+
+initData()
+
+const handleClickGoodsType = (typeId: string) => {
+  currentGoodsTypeId.value = typeId
+}
 </script>
 
 <style lang="less">

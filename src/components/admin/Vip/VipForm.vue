@@ -80,6 +80,7 @@
 
 <script lang="ts" setup>
 import api from '@/api'
+import { HTTP_STATUS_CODE } from '@/config/config'
 import type VipType from '@/types/vip'
 import type { VipTypeType } from '@/types/vip'
 import { Plus } from '@element-plus/icons-vue'
@@ -147,7 +148,7 @@ watch(()=>[props.state,props.vipId,props.show],async ()=>{
   console.log('1111')
   if(props.vipId && props.state === 'edit'){
     const { data } = await api.getVipById(props.vipId)
-    if(data.status === 11111){
+    if(data.status === HTTP_STATUS_CODE.HTTP_OK){
       vipForm.value = data.data
     }
   }else{
@@ -157,7 +158,7 @@ watch(()=>[props.state,props.vipId,props.show],async ()=>{
 
 const initVipTypeData = async () => {
   const { data } = await api.getVipType()
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     vipTypeList.value = data.data
   }
 }
@@ -171,7 +172,7 @@ const vipTypeNameExist = (_rule: any, value: any, callback: any ) =>{
   }
 
   api.checkIsExist('vipType', { name: vipTypeForm.value.name }).then(res=>{
-    if(res.status === 10000) callback(new Error(res.data.data.error))
+    if(res.status !== HTTP_STATUS_CODE.HTTP_OK) callback(new Error(res.data.data.error))
     if(res.data.data.length >= 1) callback(new Error('会员已存在'))
     callback()
   }).catch(err=>{
@@ -200,7 +201,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       }else{
         res = await api.editVip(props.vipId!, vipForm.value)
       }
-      if(res.data.status === 11111){
+      if(res.data.status === HTTP_STATUS_CODE.HTTP_OK){
         ElMessage.success(`${props.state === 'add' ? '新增' : '修改'}成功`)
         emit('closed')
       }else{
@@ -240,7 +241,7 @@ const handleEditVipType = (vipTypeData: VipTypeType) => {
  */
 const handleRemoveVipType = async (id: string) => {
   const { data } = await api.removeVipType(id)
-  if(data.status === 11111){
+  if(data.status === HTTP_STATUS_CODE.HTTP_OK){
     vipTypeList.value = vipTypeList.value.filter(vipType=>vipType.id !== id)
     ElMessage.success('删除成功')
   }else{
@@ -256,7 +257,7 @@ const handleAddVipTypeOk = async (formEl: FormInstance | undefined) => {
     if (valid) {
       if(vipTypeState.value === 'add'){
         const { data } = await api.addVipType(vipTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('新增成功')
           vipTypeList.value.push(data.data)
           formEl.resetFields()
@@ -265,7 +266,7 @@ const handleAddVipTypeOk = async (formEl: FormInstance | undefined) => {
         }
       }else if(vipTypeState.value === 'edit' && vipTypeForm.value.id){
         const { data } = await api.editVipType(vipTypeForm.value.id, vipTypeForm.value)
-        if(data.status === 11111){
+        if(data.status === HTTP_STATUS_CODE.HTTP_OK){
           ElMessage.success('修改成功')
           vipTypeList.value.find(vipType=>(vipType.id === vipTypeForm.value.id))!.name = vipTypeForm.value.name
         }else{

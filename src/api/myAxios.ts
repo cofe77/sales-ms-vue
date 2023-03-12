@@ -1,3 +1,4 @@
+import { HTTP_STATUS_CODE } from '@/config/config'
 import axios, { type Canceler } from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -40,7 +41,7 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
   async (res: any) => {
-    if (res.data.status === 50000) {
+    if (res.data.status === HTTP_STATUS_CODE.LOGIN_ERROR) {
       localStorage.clear()
       ElMessageBox.confirm('登录失效，请重新登录').then(() => {
           window.location.href = '/login'
@@ -49,12 +50,13 @@ axios.interceptors.response.use(
           // catch error
         })
       return Promise.reject(res)
+    } else if (res.data.status === HTTP_STATUS_CODE.HTTP_ERROR) {
+      ElMessage.error(res.data.msg)
+      return Promise.reject(res)
     }
     return Promise.resolve(res)
   },
   async (err: any) => {
-    const aa = err.response.data.msg !== 'Bad Request Exception'
-    console.log('aa',aa)
     if(err.response.data.msg !== 'Bad Request Exception'){
       ElMessage.error(err.response.data.msg)
     }

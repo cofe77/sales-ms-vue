@@ -10,7 +10,12 @@
       >{{goodsType.name}}</div>
     </div>
     <div class="goods-container">
-      <div v-for="goods in currentGoodsType?.goods" :key="goods.id" class="goods">
+      <div 
+        v-for="goods in currentGoodsType?.goods" 
+        :key="goods.id" 
+        class="goods"
+        @click="orderStore.addItem(goods)"
+      >
         <div class="goods-img">
           <img :src="goods.img" alt="">
         </div>
@@ -20,48 +25,51 @@
       </div>
     </div>
     <div class="order-operation">
-      <div class="order-operation-header">外带</div>
+      <div class="order-operation-header">
+        <el-button-group>
+          <el-button class="btn" :type="orderDesk.name && 'danger'" @click="handleSelectDesk">选桌{{orderDesk.name && `(${orderDesk.name})`}}</el-button>
+          <el-button class="btn" :type="!orderDesk.name && 'danger'" @click="handleSelectTakeAway">外带{{!orderDesk.name?'√':''}}</el-button>
+        </el-button-group>
+      </div>
       <div class="order-operation-body">
         <div class="order-item">
           <div class="order-item-name">商品</div>
           <div class="order-item-count">数量</div>
           <div class="order-item-price">价格</div>
         </div>
-        <div v-for="orderGoods in order.goods" :key="orderGoods.item.id" class="order-item">
-          <div class="order-item-name">{{orderGoods.item.name}}</div>
-          <div class="order-item-count">×{{orderGoods.count}}</div>
-          <div class="order-item-price">{{orderGoods.item.price}}</div>
+        <div v-for="item in orderItem" :key="item.goods.id" class="order-item">
+          <div class="order-item-name">{{item.goods.name}}</div>
+          <div class="order-item-count">×{{item.count}}</div>
+          <div class="order-item-price">{{item.goods.price.toFixed(2)}}</div>
         </div>
       </div>
       <div class="order-operation-total">
         <div class="order-item">
           <div class="order-item-name">合计</div>
           <div class="order-item-count"></div>
-          <div class="order-item-price">80000.00</div>
+          <div class="order-item-price">{{orderStore.getAmount.toFixed(2)}}</div>
         </div>
       </div>
-      <div class="order-operation-confirm">确认</div>
+      <div class="order-operation-confirm" @click="orderStore.createOrder">确认</div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import api from '@/api'
+import { useOrderStore } from '@/stores/order'
 import type { GoodsTypeType } from '@/types/goods'
-import type { CreateOrderType } from '@/types/order'
-import { computed, reactive, ref, type Ref } from 'vue'
+import { computed, toRefs, ref, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const goodsTypeArr: Ref<GoodsTypeType[]> = ref([])
 const currentGoodsTypeId = ref('')
 const currentGoodsType = computed(() => goodsTypeArr.value.find(type => type.id === currentGoodsTypeId.value))
 
-const originOrderData: CreateOrderType = {
-  deskId: '',
-  staffId: '',
-  goods: []
-}
+const orderStore = useOrderStore()
+const router = useRouter()
 
-const order = reactive(originOrderData)
+const { item:orderItem,desk:orderDesk } = toRefs(orderStore)
 
 const initData = () => {
   api.getGoodsTypeWithGoods().then(res => {
@@ -75,6 +83,15 @@ initData()
 const handleClickGoodsType = (typeId: string) => {
   currentGoodsTypeId.value = typeId
 }
+
+const handleSelectDesk = () => {
+  router.push('/pc')
+}
+
+const handleSelectTakeAway = () => {
+  orderStore.setTakeAway()
+}
+
 </script>
 
 <style lang="less">
@@ -116,6 +133,7 @@ const handleClickGoodsType = (typeId: string) => {
       text-align: center;
       background-color: rgb(216, 163, 251);
       padding: 2px;
+      cursor: pointer;
       .goods-img{
         width: 145px;
         height: 86px;

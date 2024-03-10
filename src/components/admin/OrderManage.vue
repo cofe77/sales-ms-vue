@@ -88,7 +88,7 @@
 <script lang="ts" setup>
 import { reactive } from 'vue'
 import moment from 'moment'
-import type OrderType from '@/types/order'
+import type { UpdateOrderType } from '@/types/order'
 
 const form = reactive({
   name: '',
@@ -101,20 +101,7 @@ const form = reactive({
   desc: '',
 })
 
-const resultData: OrderType[] = [
-  {
-    id: '1',
-    deskId: '1',
-    consume: 1,
-    discount: 1,
-    vipId: 'string',
-    deleted: 1,
-    checkoutType: 1,
-    cash: 1,
-    onlinePay: 1,
-    createTime: new Date().toDateString()
-  }
-]
+const resultData: UpdateOrderType[] = []
 
 const handleEdit = (index: any,row: any) => {
   console.log(' ', )

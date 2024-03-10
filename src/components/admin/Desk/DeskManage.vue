@@ -32,13 +32,13 @@
 <script lang="ts" setup>
 import api from '@/api'
 import { HTTP_STATUS_CODE } from '@/config/config'
-import type DeskType from '@/types/desk'
+import type UpdateDeskType from '@/types/desk'
 import DialogModel from '@/util-model/DialogModel.vue'
 import { ElMessage } from 'element-plus'
 import { ref, type Ref } from 'vue'
 import DeskForm from './DeskForm.vue'
 
-const deskList: Ref<DeskType[]> = ref([])
+const deskList: Ref<UpdateDeskType[]> = ref([])
 const deskFormVisible = ref(false)
 
 api.getDeskListWithType().then(res=>{

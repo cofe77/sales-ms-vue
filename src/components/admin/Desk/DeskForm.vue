@@ -134,7 +134,7 @@ const deskTypeNameExist = (_rule: any, value: any, callback: any ) =>{
   }
 
   api.checkIsExist('deskType', deskTypeForm.value).then(res=>{
-    if(res.status !== HTTP_STATUS_CODE.HTTP_OK) callback(new Error(res.data.data.error))
+    if(res.status !== 201) callback(new Error(res.data.data.error))
     if(res.data.data.length >= 1) callback(new Error('桌位已存在'))
     callback()
   }).catch(err=>{
@@ -214,7 +214,6 @@ const handleAddDeskTypeOk = async (formEl: FormInstance | undefined) => {
       console.log('newdeskType',deskTypeForm.value)
   if (!formEl) return
   await formEl.validate(async (valid) => {
-    console.log('111')
     if (valid) {
       if(deskTypeState.value === 'add'){
         const { data } = await api.addDeskType(deskTypeForm.value)

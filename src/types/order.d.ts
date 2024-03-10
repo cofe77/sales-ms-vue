@@ -1,23 +1,25 @@
 
-import GoodsType from './goods.d'
-export default interface OrderType {
-  id: string,
+import DeskType from './desk.d'
+
+export default interface CreateOrderType {
+  desk: DeskType,
   deskId: string,
+  staffId: string,
   consume: number,
+  item: {
+    goods: UpdateGoodsType,
+    count: number
+  }[]
+}
+
+export interface UpdateOrderType extends CreateOrderType {
+  id: string,
   discount: number,
+  consume: number,
   vipId: string,
-  finishTime: string,
+  finishTime?: string,
   checkoutType: number,
   cash: number,
   onlinePay: number,
-  createTime: string
-}
-
-export interface CreateOrderType {
-  deskId: string,
-  staffId: string,
-  goods: {
-    item: GoodsType,
-    count: number
-  }[]
+  createTime?: string
 }

@@ -211,6 +211,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { debounce } from 'lodash'
 import { HTTP_STATUS_CODE } from '@/config/config'
+import type CreateGoodsType from '@/types/goods'
 
 const emit = defineEmits(['open','opened','close','closed','ok'])
 const props = defineProps({
@@ -238,6 +239,7 @@ const goodsTypeState = ref('')
 const upload = ref<UploadInstance>()
 
 const originGoods = {
+  id: '',
   name: '',
   price: 0,
   desc: '',
@@ -247,7 +249,7 @@ const originGoods = {
   img: '',
   state: 0
 }
-const goodsForm:Ref<GoodsType> = ref(originGoods)
+const goodsForm = ref(originGoods)
 const goodsTypeForm:Ref<GoodsTypeType> = ref({
   name: ''
 })

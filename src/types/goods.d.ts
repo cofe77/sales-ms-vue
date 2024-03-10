@@ -1,8 +1,7 @@
 import type OrderType from './order'
 import type DeskType from './desk'
 
-export default interface GoodsType {
-  id?: string,
+export default interface CreateGoodsType {
   name: string,
   price: number,
   desc: string,
@@ -11,6 +10,9 @@ export default interface GoodsType {
   typeId: string,
   img: string,
   state: number,
+}
+export interface UpdateGoodsType extends CreateGoodsType {
+  id: string,
   updateTime?: string
 }
 

@@ -4,6 +4,7 @@ import type { DeskTypeType } from '@/types/desk'
 import type DeskType from '@/types/desk'
 import type { GoodsTypeType } from '@/types/goods'
 import type GoodsType from '@/types/goods'
+import type CreateOrderType from '@/types/order'
 import type StaffType from '@/types/staff'
 import type { VipTypeType } from '@/types/vip'
 import type VipType from '@/types/vip'
@@ -16,6 +17,7 @@ interface ApiBase {
   imgUpload: string,
   checkIsExist: string,
   getDeskListWithOrder: string,
+  getDeskWithOrderById: string,
   getDeskListWithType: string,
   getCurrentOrderList: string,
   getGoodsTypeList: string,
@@ -60,6 +62,7 @@ interface ApiBase {
   editCarouselIndex: string,
   pullCarousel: string,
   removeCarousel: string,
+  newOrder: string,
 }
 
 const base:ApiBase = {
@@ -67,8 +70,9 @@ const base:ApiBase = {
   login: '/staff/login',
   imgUpload: '/file/imgUpload',
   checkIsExist: '/checkIsExist',
-  getDeskListWithOrder: '/desk/withOrder',
-  getDeskListWithType: '/desk/withType',
+  getDeskListWithOrder: '/desk/listWithOrder',
+  getDeskWithOrderById: '/desk/withOrder',
+  getDeskListWithType: '/desk/listWithType',
   getCurrentOrderList: '/order',
   getGoodsTypeList: '/goodsType',
   getGoodsTypeWithGoods: '/goodsType/withGoods',
@@ -112,6 +116,7 @@ const base:ApiBase = {
   editCarouselIndex: '/carousel/editIndex',
   pullCarousel: '/carousel',
   removeCarousel: '/carousel',
+  newOrder: '/order'
 }
 
 interface ApiObject {
@@ -119,6 +124,7 @@ interface ApiObject {
   imgUpload:(data:FormData)=>AxiosPromise,
   checkIsExist:(dbName: DbName, condition: ExistReqConditionType)=>AxiosPromise,
   getDeskListWithOrder:()=>AxiosPromise,
+  getDeskWithOrderById:(id: string)=>AxiosPromise,
   getDeskListWithType:()=>AxiosPromise,
   getCurrentOrderList:()=>AxiosPromise,
   getGoodsTypeList:()=>AxiosPromise,
@@ -163,6 +169,7 @@ interface ApiObject {
   editCarouselIndex:(currentId: string, targetId:string)=>AxiosPromise,
   pullCarousel:(id: string, state:number)=>AxiosPromise,
   removeCarousel:(id: string)=>AxiosPromise,
+  newOrder:(order: CreateOrderType)=>AxiosPromise,
 }
 
 const api: ApiObject = {
@@ -180,6 +187,9 @@ const api: ApiObject = {
   },
   getDeskListWithOrder(){
     return axios.get(base.baseUrl + base.getDeskListWithOrder)
+  },
+  getDeskWithOrderById(id){
+    return axios.get(base.baseUrl + base.getDeskWithOrderById + '/' + id,)
   },
   getDeskListWithType(){
     return axios.get(base.baseUrl + base.getDeskListWithType)
@@ -313,6 +323,9 @@ const api: ApiObject = {
   removeCarousel(id){
     return axios.delete(base.baseUrl + base.removeCarousel + '/' + id)
   },
+  newOrder(order){
+    return axios.post(base.baseUrl + base.newOrder, order)
+  }
 }
 
 export default api

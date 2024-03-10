@@ -18,7 +18,17 @@
           <div class="waitForSend-name">{{item.goods?.name || ''}}({{item.desk?.name}})</div>
           <div class="waitForSend-count">×{{item.count}}</div>
           <div class="waitForSend-confirm">
-            <div class="waitForSend-confirm-btn" @click="handleDispatch(item.id!)">确认</div>
+            <Transition name="send" mode="out-in">
+              <div
+                v-if="isShow(item.id!)"
+                class="waitForSend-confirm-btn"
+                @click="handleDispatch(item.id!)"
+              >确认</div>
+              <Fragment v-else>
+                <el-button type="primary" @click="handleDispatchCancel">否</el-button>
+                <el-button type="danger" @click="handleDispatchConfirm(item.id!)">是</el-button>
+              </Fragment>
+            </Transition>
           </div>
         </div>
       </div>
@@ -27,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
+import { Fragment, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { io } from 'socket.io-client'
 import type { OrderGoodsType } from '@/types/goods'
@@ -36,7 +46,10 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const route = useRoute()
 const current = ref('pc')
+const currentSendId = ref('')
 const dispatchList: Ref<OrderGoodsType[]> = ref([])
+
+const cancelTimer = ref()
 
 watch(route,()=>current.value = location.href.split('/').reverse()[0])
 const pcLinkTo = (target:string) => {
@@ -65,8 +78,21 @@ onUnmounted(() => {
   socket.close()
 })
 
-
+const isShow = (id: string) => {
+  return currentSendId.value !== id
+}
 const handleDispatch = (id: string) => {
+  currentSendId.value = id
+  cancelTimer.value = setTimeout(() => {
+    currentSendId.value = ''
+  },3000)
+}
+const handleDispatchCancel = (id: string) => {
+  currentSendId.value = ''
+  clearTimeout(cancelTimer.value)
+  cancelTimer.value = ''
+}
+const handleDispatchConfirm = (id: string) => {
   socket.emit('finishDispatchById',id,(data:any)=>{
     if(data.affected === 1){
       dispatchList.value = dispatchList.value.filter((dis:OrderGoodsType)=>dis.id!==id)
@@ -153,7 +179,6 @@ const handleDispatch = (id: string) => {
           line-height: 40px;
         }
         .waitForSend-confirm{
-          display: none;
           margin-left: 10px;
           .waitForSend-confirm-btn{
             background-color: rgb(99, 63, 207);
@@ -161,10 +186,23 @@ const handleDispatch = (id: string) => {
             border-radius: 3px;
             color: #d8d8d8;
           }
-        }
-        &:hover{
-          .waitForSend-confirm{
-            display: block;
+          .send-enter-active,
+          .send-leave-active {
+            transition: opacity 0.2s ease;
+          }
+
+          .send-enter-from,
+          .send-leave-to {
+            opacity: 0;
+          }
+          .confirm-enter-active,
+          .confirm-leave-active {
+            transition: opacity 0.2s ease;
+          }
+
+          .confirm-enter-from,
+          .confirm-leave-to {
+            opacity: 0;
           }
         }
       }

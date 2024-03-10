@@ -10,6 +10,8 @@ import App from './App.vue'
 import router from './router'
 import UtilModel from '@/util-model'
 
+import piniaPluginPersist from 'pinia-plugin-persist'
+
 import 'normalize.css/normalize.css'
 import 'element-plus/es/components/message/style/css'
 import '@/assets/css/main.less'
@@ -19,8 +21,16 @@ moment.locale('zh-cn')
 
 
 const app = createApp(App)
+const pinia = createPinia()
+// 因为状态管理使用的是setup的方式构建所以我们重写一个$reset并挂载到pinia中
+pinia.use(({ store }) => {
+    const initialState = JSON.parse(JSON.stringify(store.$state))
+    store.$reset = () => {
+        store.$patch(initialState)
+    }
+}).use(piniaPluginPersist)
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(UtilModel)
 app.use(ElementPlus, { size: 'small', zIndex: 3000 })
